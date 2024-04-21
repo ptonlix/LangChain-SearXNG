@@ -1,0 +1,47 @@
+# The default configuration file.
+# More information about configuration can be found in the documentation: https://docs.deepread.dev/
+# Syntax in `langchain_searxng/settings/settings.py`
+server:
+  env_name: ${APP_ENV:prod}
+  port: ${PORT:8002}
+  cors:
+    enabled: false
+    allow_origins: ["*"]
+    allow_methods: ["*"]
+    allow_headers: ["*"]
+  auth:
+    enabled: true
+    # python -c 'import base64; print("Basic " + base64.b64encode("secret:key".encode()).decode())'
+    # 'secret' is the username and 'key' is the password for basic auth by default
+    # If the auth is enabled, this value must be set in the "Authorization" header of the request.
+    secret: "Basic c2VjcmV0OmtleQ=="
+
+llm:
+  mode: openai+zhipuai
+
+embedding:
+  mode: zhipuai
+
+openai:
+  temperature: 1
+  modelname: "gpt-3.5-turbo-0125" #"gpt-3.5-turbo-1106"
+  api_base: ${OPENAI_API_BASE:}
+  api_key: ${OPENAI_API_KEY:}
+
+zhipuai:
+  temperature: 0.95
+  top_p: 0.6
+  modelname: "glm-3-turbo"
+  api_key: ${ZHIPUAI_API_KEY:}
+
+langsmith:
+  trace_version_v2: true
+  api_key: ${LANGCHAIN_API_KEY:}
+
+searxng:
+  host: ${SEARX_HOST:}
+  language: "zh-CN"
+  safesearch: 1
+  categories: "general"
+  engines: ["bing", "brave", "duckduckgo"]
+  num_results: 3
