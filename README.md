@@ -67,17 +67,44 @@ curl -sSL https://install.python-poetry.org | python3 -
 
 ### 3. 运行 LangChain-SearXNG
 
+- 安装依赖
+
 ```shell
 # 克隆项目代码到本地
 git clone https://github.com/ptonlix/LangChain-SearXNG.git
 conda activate LangChain-SearXNG # 激活环境
 cd LangChain-SearXNG # 进入项目
 poetry install # 安装依赖
-
-# 启动项目
-python -m langchain_searxng
 ```
 
-### 4.查看 API
+- 修改配置文件
 
+```shell
+# settings.yaml
+
+配置文件录入或通过环境变量设置以下变量
+
+# OPENAI 大模型API
+OPENAI_API_BASE
+OPENAI_API_KEY
+
+# ZHIPUAI 智谱API
+ZHIPUAI_API_KEY
+
+# LangChain调试 API
+LANGCHAIN_API_KEY
+
+# SearXNG请求地址
+SEARX_HOST
+
+```
+
+- 启动项目
+
+```shell
+# 启动项目
+python -m langchain_searxng
+
+# 查看API
 访问: http://localhost:8002/docs 获取 API 信息
+```
