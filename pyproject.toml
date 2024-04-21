@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "langchain-searxng"
+version = "0.1.0"
+description = ""
+authors = ["ptonlix <260431910@qq.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+langchain = "^0.1.16"
+fastapi = "^0.110.1"
+injector = "^0.21.0"
+tiktoken = "^0.6.0"
+sse-starlette = "^2.1.0"
+openai = "^1.23.1"
+zhipuai = "^2.0.1"
+bs4 = "^0.0.2"
+html2text = "^2024.2.26"
+fake-useragent = "^1.5.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
