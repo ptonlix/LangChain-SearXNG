@@ -79,6 +79,10 @@ poetry install # 安装依赖
 
 - 修改配置文件
 
+[OpenAI 文档](https://platform.openai.com/docs/introduction)  
+[ZhipuAI 文档](https://open.bigmodel.cn/dev/howuse/introduction)  
+[LangChain API](https://smith.langchain.com)
+
 ```shell
 # settings.yaml
 
@@ -108,3 +112,95 @@ python -m langchain_searxng
 # 查看API
 访问: http://localhost:8002/docs 获取 API 信息
 ```
+
+## 🎸 项目介绍
+
+---
+
+### [帝阅介绍](https://dread.run/#/)
+
+> 「帝阅」  
+> 是一款个人专属知识管理与创造的 AI Native 产品  
+> 为用户打造一位专属的侍读助理，帮助提升用户获取知识效率和发挥创造力  
+> 让用户更好地去积累知识、管理知识、运用知识
+
+LangChain-SearXNG 是帝阅项目一个子项目，我们决定开源出来，与大家交流学习共建
+同时，欢迎大家前往体验[帝阅](https://dread.run/#/) 给我们提出宝贵的建议
+
+---
+
+<p align="center">
+	<img height=300 src="./docs/pic/yuanli.png">
+</p>
+
+目前 LLM Agent 本质上都是使用了 Prompt+Tool 两个方面的能力
+以我们 AI 搜索引擎 Agent 为例：
+
+1. 将根据用户搜索关键词，去调用 Tool 收集信息
+2. 将收集到的信息通过与 system prompt 等提示词组合，输入到大模型
+3. 大模型将依据收集到的上下文，提供更符合用户要求的搜索答案
+
+本项目通过构建 SearXNG 搜索引擎 Tool + LangChain LCEL 调用方式构成-AI 搜索引擎 Agent，以 Fastapi 对外提供服务
+
+### 1. 项目目录结构
+
+```
+├── docs  # 文档
+├── langchain_searxng
+│   ├── components #自定义组件
+│   ├── server # API服务
+│   ├── settings # 配置服务
+│   ├── utils
+│   ├── constants.py
+│   ├── di.py
+│   ├── launcher.py
+│   ├── main.py
+│   ├── paths.py
+│   ├── __init__.py
+│   ├── __main__.py #入口
+│   └── __version__.py
+├── log # 日志目录
+```
+
+### 2. 功能介绍
+
+- 支持查询结果 http sse 流示和整体返回
+- 支持联网查询 QA 和直接 QA 切换
+- 支持 Token 计算（含 embedding）
+- 支持 openai 和 zhipuai 两种大模型
+
+## 🚩 Roadmap
+
+- [x] 搭建 LangChain-SearXNG 初步框架，完善基本功能
+- [ ] 完善 网站页面内容爬取效果
+  - [ ] 支持网络访问异常处理，方便国内环境使用
+- [ ] 支持更多模型
+  - [ ] 在线大模型
+  - [ ] 本地大模型
+- [ ] 搭建前端 Web Demo
+  - [ ] 选择 LLM
+
+## 🌏 项目交流讨论
+
+<img height=240 src="https://img.gejiba.com/images/f0cf4242e87615dff574806169f9732a.png"/>
+
+🎉 扫码联系作者，如果你也对本项目感兴趣  
+🎉 欢迎加入 LangChain-SearXNG (帝阅开发社区) 项目群参与讨论交流
+
+## 💥 贡献
+
+欢迎大家贡献力量，一起共建 LangChain-SearXNG，您可以做任何有益事情
+
+- 报告错误
+- 建议改进
+- 文档贡献
+- 代码贡献  
+  ...  
+  👏👏👏
+
+---
+
+<p align="center">
+	<img height=240 src="./docs/pic/logo.jpg"/><br> 
+	<b face="雅黑">帝阅DeepRead</b>
+</p>
