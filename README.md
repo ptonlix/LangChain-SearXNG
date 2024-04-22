@@ -124,7 +124,8 @@ python -m langchain_searxng
 > 为用户打造一位专属的侍读助理，帮助提升用户获取知识效率和发挥创造力  
 > 让用户更好地去积累知识、管理知识、运用知识
 
-LangChain-SearXNG 是帝阅项目一个子项目，我们决定开源出来，与大家交流学习共建
+LangChain-SearXNG 是帝阅项目一个子项目，我们决定开源出来，与大家交流学习
+
 同时，欢迎大家前往体验[帝阅](https://dread.run/#/) 给我们提出宝贵的建议
 
 ---
@@ -142,7 +143,7 @@ LangChain-SearXNG 是帝阅项目一个子项目，我们决定开源出来，�
 
 本项目通过构建 SearXNG 搜索引擎 Tool + LangChain LCEL 调用方式构成-AI 搜索引擎 Agent，以 Fastapi 对外提供服务
 
-### 1. 项目目录结构
+### 1. 目录结构
 
 ```
 ├── docs  # 文档
@@ -198,9 +199,7 @@ LangChain-SearXNG 是帝阅项目一个子项目，我们决定开源出来，�
   ...  
   👏👏👏
 
----
-
 <p align="center">
-	<img height=240 src="./docs/pic/logo.jpg"/><br> 
+	<img height=160 src="./docs/pic/logo.jpg"/><br> 
 	<b face="雅黑">帝阅DeepRead</b>
 </p>
