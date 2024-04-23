@@ -165,7 +165,7 @@ LangChain-SearXNG 是帝阅项目一个子项目，我们决定开源出来，�
 
 ### 2. 功能介绍
 
-- 支持查询结果 http sse 流示和整体返回
+- 支持查询结果 http sse 流式和非流式（整体）返回
 - 支持联网查询 QA 和直接 QA 切换
 - 支持 Token 计算（含 embedding）
 - 支持 openai 和 zhipuai 两种大模型
