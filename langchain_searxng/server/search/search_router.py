@@ -120,7 +120,10 @@ class SearchSseResponse(BaseModel):
     retry: int = Field(default=15000)
 
 
-@search_router.post("/search/sse")
+@search_router.post(
+    "/search/sse",
+    tags=["Search"],
+)
 async def search_sse(request: Request, body: SearchRequest):
     """
     Streaming search results over http sse
@@ -228,7 +231,10 @@ class SendFeedbackBody(BaseModel):
     comment: Optional[str] = None
 
 
-@search_router.post("/feedback")
+@search_router.post(
+    "/feedback",
+    tags=["Search"],
+)
 async def send_feedback(request: Request, body: SendFeedbackBody):
     service = request.state.injector.get(SearchService)
     service.trace_service.trace_client.create_feedback(
@@ -245,7 +251,10 @@ class GetTraceBody(BaseModel):
     run_id: UUID
 
 
-@search_router.post("/get_trace")
+@search_router.post(
+    "/get_trace",
+    tags=["Search"],
+)
 async def get_trace(request: Request, body: GetTraceBody):
     service = request.state.injector.get(SearchService)
 
