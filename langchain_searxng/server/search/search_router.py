@@ -17,6 +17,7 @@ from langchain_searxng.server.utils.model import (
 )
 from langchain_community.callbacks import get_openai_callback
 from langchain_searxng.components.llm.custom.zhipuai import get_zhipuai_callback
+from langchain_searxng.components.searxng.searxng_component import DocSource
 from sse_starlette.sse import EventSourceResponse
 from uuid import UUID
 
@@ -162,17 +163,30 @@ async def search_sse(request: Request, body: SearchRequest):
                     "configurable": {"retriever": body.retriever, "llm": body.llm},
                     "callbacks": [calltoken],
                 },
-                include_names=["FinalSourceRetriever"],
+                include_names=["FinalSourceRetriever", "Retriever"],
             ):
                 if await request.is_disconnected():
                     logger.warning("The connection has been interrupted.")
                     break
-
                 for op in chunk.ops:
+                    # 流式返回来源信息
+                    if "Retriever/final_output" in op["path"]:
+                        for doc in op["value"]["documents"]:
+                            yield SearchSseResponse(
+                                event="source",
+                                data=DocSource(
+                                    title=doc.metadata.get("title"),
+                                    source_link=doc.metadata.get("source"),
+                                    description=doc.metadata.get("description"),
+                                ),
+                            ).model_dump()
+
                     if len(op["path"]) == 0:
                         yield SearchSseResponse(
                             event="runid", data=op["value"]["id"]
                         ).model_dump()
+                    elif "FinalSourceRetriever/final_output" in op["path"]:
+                        logger.info(op["value"])
                     elif "streamed_output" in op["path"]:
                         yield SearchSseResponse(
                             event="message", data=op["value"]
@@ -183,7 +197,7 @@ async def search_sse(request: Request, body: SearchRequest):
             yield SearchSseResponse(event="complete", data=final_output).model_dump()
 
             yield SearchSseResponse(
-                event="source",
+                event="source_complete",
                 data=[
                     docs.copy()
                     for docs in service.searxng_service.search_retriever.get_docsource_list()

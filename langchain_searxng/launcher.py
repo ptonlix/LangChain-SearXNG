@@ -11,6 +11,10 @@ from langchain_searxng.paths import docs_path
 from langchain_searxng.settings.settings import Settings
 from langchain_searxng.server.search.search_router import search_router
 from langchain_searxng.server.health.health_router import health_router
+from langchain_searxng.server.config.config_router import (
+    config_router_no_auth,
+    config_router,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +71,8 @@ def create_app(root_injector: Injector) -> FastAPI:
 
         app.include_router(search_router)
         app.include_router(health_router)
+        app.include_router(config_router_no_auth)
+        app.include_router(config_router)
 
         settings = root_injector.get(Settings)
         if settings.server.cors.enabled:

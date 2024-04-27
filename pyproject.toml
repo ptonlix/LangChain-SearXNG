@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "langchain-searxng"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["ptonlix <260431910@qq.com>"]
 readme = "README.md"
@@ -17,6 +17,7 @@ zhipuai = "^2.0.1"
 bs4 = "^0.0.2"
 html2text = "^2024.2.26"
 fake-useragent = "^1.5.1"
+watchfiles = "^0.21.0"
 
 
 [build-system]

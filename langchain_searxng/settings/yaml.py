@@ -3,6 +3,7 @@ import re
 import typing
 from typing import Any, TextIO
 
+import yaml
 from yaml import SafeLoader
 
 _env_replace_matcher = re.compile(r"\$\{(\w|_)+:?.*}")
@@ -39,3 +40,18 @@ def load_yaml_with_envvars(
         return loader.get_single_data()
     finally:
         loader.dispose()
+
+
+@typing.no_type_check  # pyaml does not have good hints, everything is Any
+def update_yaml_config_file(file_path: str, update_dict: dict[str, Any]):
+    """Update YAML configuration file with given key-value pairs."""
+    with open(file_path, "r") as file:
+        config = yaml.safe_load(file)
+
+    # Update the config dictionary with the provided key-value pairs
+    for key, value in update_dict.items():
+        config[key] = value
+
+    # Write the updated config back to the file
+    with open(file_path, "w") as file:
+        yaml.safe_dump(config, file, sort_keys=False)

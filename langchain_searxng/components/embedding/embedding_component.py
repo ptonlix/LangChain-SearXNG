@@ -2,7 +2,7 @@ import logging
 
 from injector import inject, singleton
 from langchain_community.embeddings import OpenAIEmbeddings
-from langchain_core.embeddings import Embeddings
+from langchain_core.embeddings import Embeddings, DeterministicFakeEmbedding
 
 from langchain_searxng.settings.settings import Settings
 from langchain_searxng.components.embedding.custom.zhipuai import ZhipuaiTextEmbeddings
@@ -30,6 +30,8 @@ class EmbeddingComponent:
                 self._embedding = ZhipuaiTextEmbeddings(
                     zhipuai_api_key=zhipuai_settings.api_key
                 )
+            case "mock":
+                self._embedding = DeterministicFakeEmbedding(size=1352)
 
     @property
     def embedding(self) -> Embeddings:
