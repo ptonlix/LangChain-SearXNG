@@ -75,3 +75,9 @@ vim settings-pro.yaml
 # 4. 启动项目，程序会自动合并两个配置文件，冲突地方以settings-pro.yaml为准
 
 ```
+
+## 动态加载配置文件
+
+通过监听 yaml 配置文件发生内容变化，程序会重新加载文件，方便实时调整参数
+
+详情见 `langchain_searxng/__main__.py` 代码
