@@ -30,6 +30,10 @@ def create_app(root_injector: Injector) -> FastAPI:
                 "description": "AI-enabled search engine",
             },
             {
+                "name": "Config",
+                "description": "Obtain and modify project configuration files",
+            },
+            {
                 "name": "Health",
                 "description": "Simple health API to make sure the server is up and running.",
             },
