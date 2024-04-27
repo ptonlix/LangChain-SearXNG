@@ -16,7 +16,7 @@ from langchain_searxng.settings.yaml import (
 
 logger = logging.getLogger(__name__)
 
-_settings_folder = os.environ.get("PGPT_SETTINGS_FOLDER", PROJECT_ROOT_PATH)
+_settings_folder = os.environ.get("LS_SETTINGS_FOLDER", PROJECT_ROOT_PATH)
 
 # if running in unittest, use the test profile
 _test_profile = ["test"] if "unittest" in sys.modules else []
@@ -25,7 +25,7 @@ active_profiles: list[str] = unique_list(
     ["default"]
     + [
         item.strip()
-        for item in os.environ.get("PGPT_PROFILES", "").split(",")
+        for item in os.environ.get("LS_PROFILES", "").split(",")
         if item.strip()
     ]
     + _test_profile

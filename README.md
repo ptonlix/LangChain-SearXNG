@@ -35,6 +35,17 @@ cd searxng-docker
 # 修改域名和录入邮箱
 vim .env
 
+# 修改searxng配置文件 searxng/settings.yml
+# 注意修改 limiter 和search，其它参数保持原配置文件不变
+# see https://docs.searxng.org/admin/settings/settings.html#settings-use-default-settings
+use_default_settings: true
+server:
+  limiter: false  # can be disabled for a private instance
+search:
+  formats:
+    - html
+    - json
+
 # 启动docker
 docker compose up
 ```
@@ -103,6 +114,8 @@ SEARX_HOST
 
 ```
 
+详情配置文件介绍见: [LangChain-SearXNG 配置](./docs/config.md)
+
 - 启动项目
 
 ```shell
@@ -169,10 +182,12 @@ LangChain-SearXNG 是帝阅项目一个子项目，我们决定开源出来，�
 - 支持联网查询 QA 和直接 QA 切换
 - 支持 Token 计算（含 embedding）
 - 支持 openai 和 zhipuai 两种大模型
+- 支持 配置文件动态加载
 
 ## 🚩 Roadmap
 
 - [x] 搭建 LangChain-SearXNG 初步框架，完善基本功能
+- [x] 支持配置文件动态加载，方便更改相关参数
 - [ ] 完善 网站页面内容爬取效果
   - [ ] 支持网络访问异常处理，方便国内环境使用
 - [ ] 支持更多模型
