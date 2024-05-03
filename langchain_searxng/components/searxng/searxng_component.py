@@ -8,9 +8,11 @@ from langchain.schema.retriever import BaseRetriever
 from langchain.schema.document import Document
 from langchain_community.document_loaders.async_html import AsyncHtmlLoader
 from langchain_community.document_transformers.html2text import Html2TextTransformer
-from requests.exceptions import RequestException
 from pydantic import BaseModel
 from typing import List, Optional
+from concurrent.futures import ThreadPoolExecutor
+import asyncio
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +46,36 @@ class SearXNGRetriever(BaseRetriever):
     def clear_docsource_list(self):
         self.docsource_list = []
 
+    async def check_url(self, url: str):
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.get(url)
+                return url, response.status_code
+            except httpx.RequestError:
+                return url, None
+
+    async def check_urls(self, urls: list[str]):
+        tasks = [self.check_url(url) for url in urls]
+        results = await asyncio.gather(*tasks)
+        for url, status_code in results:
+            if status_code is None:
+                logger.warning(f"URL: {url} - Failed to connect")
+        return results
+
+    def check_urls_access(self, urls: list[str]) -> list[str]:
+        try:
+            # Raises RuntimeError if there is no current event loop.
+            asyncio.get_running_loop()
+            # If there is a current event loop, we need to run the async code
+            # in a separate loop, in a separate thread.
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(asyncio.run, self.check_urls(urls))
+                results = future.result()
+        except RuntimeError:
+            results = asyncio.run(self.check_urls(urls))
+
+        return [url for url, status_code in results if status_code is not None]
+
     def _get_relevant_documents(
         self, query: str, *, run_manager: CallbackManagerForRetrieverRun
     ) -> List[Document]:
@@ -68,7 +100,13 @@ class SearXNGRetriever(BaseRetriever):
                     urls_to_look.append(res["link"])
 
             logger.info(f"Result urls: {urls_to_look}")
-            loader = AsyncHtmlLoader(urls_to_look)
+            urls_to_look = self.check_urls_access(
+                urls_to_look
+            )  # 检查是否能正常访问这些urls
+            loader = AsyncHtmlLoader(
+                urls_to_look,
+                ignore_load_errors=True,
+            )
             html2text = Html2TextTransformer()
             logger.info("Indexing new urls...")
             docs = loader.load()
@@ -86,7 +124,7 @@ class SearXNGRetriever(BaseRetriever):
 
             logger.info("Get html docs done...")
             return docs
-        except (RequestException, IndexError, KeyError) as e:
+        except Exception as e:
             logger.error(f"Error occurred while retrieving documents: {e}")
             return []
 
