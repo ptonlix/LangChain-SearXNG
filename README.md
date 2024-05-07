@@ -66,7 +66,7 @@ rm -rf ~/miniconda3/miniconda.sh
 
 ```shell
 # 创建环境
-conda create -n DeepRead python==3.10.11
+conda create -n LangChain-SearXNG python==3.10.11
 ```
 
 - 安装 poetry
@@ -188,8 +188,8 @@ LangChain-SearXNG 是帝阅项目一个子项目，我们决定开源出来，�
 
 - [x] 搭建 LangChain-SearXNG 初步框架，完善基本功能
 - [x] 支持配置文件动态加载，方便更改相关参数
-- [ ] 完善 网站页面内容爬取效果
-  - [ ] 支持网络访问异常处理，方便国内环境使用
+- [x] 完善 网站页面内容爬取效果
+  - [x] 支持网络访问异常处理，方便国内环境使用
 - [ ] 支持更多模型
   - [ ] 在线大模型
   - [ ] 本地大模型
@@ -201,7 +201,7 @@ LangChain-SearXNG 是帝阅项目一个子项目，我们决定开源出来，�
 <img height=240 src="https://img.gejiba.com/images/f0cf4242e87615dff574806169f9732a.png"/>
 
 🎉 扫码联系作者，如果你也对本项目感兴趣  
-🎉 欢迎加入 LangChain-SearXNG (帝阅开发社区) 项目群参与讨论交流
+🎉 欢迎加入 LangChain-X (帝阅开发社区) 项目群参与讨论交流
 
 ## 💥 贡献
 

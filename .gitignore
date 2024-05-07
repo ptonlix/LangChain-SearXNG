@@ -147,3 +147,5 @@ wandb/
 
 *.pkl
 *.bin
+
+settings-pro.yaml
