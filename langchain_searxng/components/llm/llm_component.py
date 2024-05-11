@@ -48,7 +48,8 @@ class LLMComponent:
                     ConfigurableField(id="llm"),
                     default_key="zhipuai",
                 )
-            case "openai+zhipuai":
+
+            case "all":
                 openai_settings = settings.openai
                 zhipuai_settings = settings.zhipuai
                 self._llm = ChatOpenAI(

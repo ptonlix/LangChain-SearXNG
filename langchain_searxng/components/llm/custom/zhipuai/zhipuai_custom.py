@@ -1,4 +1,5 @@
 """ZHIPU AI chat models wrapper."""
+
 from __future__ import annotations
 
 import asyncio
@@ -374,6 +375,7 @@ class ChatZhipuAI(BaseChatModel):
             "model_name": self.model_name,
             "task_id": response.get("id", ""),
             "created_time": response.get("created", ""),
+            "web_search": response.get("web_search", []),
         }
         return ChatResult(generations=generations, llm_output=llm_output)
 
@@ -491,6 +493,8 @@ class ChatZhipuAI(BaseChatModel):
             if len(chunk["choices"]) == 0:
                 continue
             choice = chunk["choices"][0]
+            web_search = chunk.get("web_search", [])
+            usage = chunk.get("usage", {})
             chunk = _convert_delta_to_message_chunk(
                 choice["delta"], default_chunk_class
             )
@@ -499,7 +503,12 @@ class ChatZhipuAI(BaseChatModel):
             generation_info = (
                 dict(finish_reason=finish_reason) if finish_reason is not None else None
             )
+            if web_search:
+                generation_info["web_search"] = web_search
+            if usage:
+                generation_info["usage"] = usage
             default_chunk_class = chunk.__class__
+
             chunk = ChatGenerationChunk(message=chunk, generation_info=generation_info)
             yield chunk
             if run_manager:

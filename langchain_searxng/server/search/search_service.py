@@ -3,7 +3,10 @@ from langchain_searxng.components.llm.llm_component import LLMComponent
 from langchain_searxng.components.embedding.embedding_component import (
     EmbeddingComponent,
 )
-from langchain_searxng.components.searxng.searxng_component import SearXNGComponent
+from langchain_searxng.components.searxng.searxng_component import (
+    SearXNGComponent,
+    DocSource,
+)
 from langchain_searxng.components.trace.trace_component import TraceComponent
 from langchain_searxng.server.search.search_prompt import (
     RESPONSE_TEMPLATE,
@@ -90,7 +93,9 @@ class SearchRequest(BaseModel):
         extra={"widget": {"type": "chat", "input": "question", "output": "answer"}},
     )
     conversation_id: str
-    retriever: str = Field(default="searx", description="搜索引擎")
+    retriever: str = Field(
+        default="searx", description="搜索引擎"
+    )  # searx, zhipuwebsearch
     llm: str = Field(default="openai", description="大模型")
 
 
@@ -205,6 +210,7 @@ class SearchService:
             self.llm_service.llm,
             self.get_searx_retriever(self.embedding_service.embedding),
         )
+        self.zhipu_chain = self.create_zhipu_chain(self.llm_service.llm)
 
     def num_tokens_from_string(self, string: str) -> int:
         """Returns the number of tokens in a text string."""
@@ -373,6 +379,92 @@ class SearchService:
                 )
                 | no_network_response_synthesizer
             ).with_config(run_name="ContextChainWithNoNetwork"),
+        ).with_config(
+            run_name="RouteDependingOnNetwork"
+        )
+
+    def convert_zhipu_to_docsource(
+        self, websearch: List[Dict[str, str]]
+    ) -> List[DocSource]:
+        result = []
+        try:
+            for obj in websearch:
+                result.append(
+                    DocSource(
+                        title=obj.get("title"),
+                        source_link=obj.get("link"),
+                        description=obj.get("content"),
+                    )
+                )
+            return result
+        except Exception:
+            return []
+
+    def create_zhipu_chain(self, llm: BaseLanguageModel):
+
+        _prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", NO_NETWORK_RESPONSE_TEMPLATE),
+                MessagesPlaceholder(variable_name="chat_history"),
+                ("human", "{question}"),
+            ]
+        ).partial(current_date=datetime.now().isoformat())
+
+        no_network_response_synthesizer = (
+            _prompt
+            | llm.bind(
+                tools=[
+                    {
+                        "type": "web_search",
+                        "web_search": {"enable": False},
+                    }
+                ],
+            )
+            | StrOutputParser()
+        ).with_config(
+            run_name="GenerateResponse",
+        )
+
+        network_response_synthesizer = (
+            _prompt
+            | llm.bind(
+                tools=[
+                    {
+                        "type": "web_search",
+                        "web_search": {
+                            "enable": True,
+                            "search_result": True,
+                        },
+                    }
+                ],
+            )
+            | StrOutputParser()
+        ).with_config(
+            run_name="GenerateResponse",
+        )
+
+        return {
+            "question": RunnableLambda(itemgetter("question")).with_config(
+                run_name="Itemgetter:question"
+            ),
+            "chat_history": RunnableLambda(self.serialize_history).with_config(
+                run_name="SerializeHistory"
+            ),
+            "network": RunnableLambda(itemgetter("network")).with_config(
+                run_name="Itemgetter:network"
+            ),
+        } | RunnableBranch(
+            (
+                RunnableLambda(lambda x: bool(x.get("network"))).with_config(
+                    run_name="HasNetworkCheck"
+                ),
+                network_response_synthesizer.with_config(
+                    run_name="ContextChainWithNetwork"
+                ),
+            ),
+            no_network_response_synthesizer.with_config(
+                run_name="ContextChainWithNoNetwork"
+            ),
         ).with_config(
             run_name="RouteDependingOnNetwork"
         )

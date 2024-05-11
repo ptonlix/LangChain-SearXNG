@@ -1,4 +1,5 @@
 """Callback Handler that prints to std out."""
+
 import threading
 from typing import Any, Dict, List
 
@@ -7,6 +8,10 @@ from langchain_core.outputs import LLMResult
 from contextlib import contextmanager
 from typing import (
     Generator,
+    cast,
+)
+from langchain_core.outputs import (
+    ChatGenerationChunk,
 )
 
 MODEL_COST_PER_1K_TOKENS = {
@@ -77,6 +82,8 @@ class ZhipuAICallbackHandler(BaseCallbackHandler):
     successful_requests: int = 0
     total_cost: float = 0.0
 
+    web_search: List[Dict[str, str]] = []
+
     def __init__(self) -> None:
         super().__init__()
         self._lock = threading.Lock()
@@ -103,6 +110,28 @@ class ZhipuAICallbackHandler(BaseCallbackHandler):
 
     def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         """Print out the token."""
+        chunk = cast(ChatGenerationChunk, kwargs.get("chunk"))
+        web_search = chunk.message.response_metadata.get("web_search")
+        usage = chunk.message.response_metadata.get("usage")
+        if usage:
+            self.total_tokens = usage.get("total_tokens", 0)
+            self.prompt_tokens = usage.get("prompt_tokens", 0)
+            self.completion_tokens = usage.get("completion_tokens", 0)
+
+            model_name = standardize_model_name(kwargs.get("model_name", ""))
+            if model_name in MODEL_COST_PER_1K_TOKENS:
+                completion_cost = get_zhipuai_token_cost_for_model(
+                    model_name, self.completion_tokens, is_completion=True
+                )
+                prompt_cost = get_zhipuai_token_cost_for_model(
+                    model_name, self.prompt_tokens
+                )
+            else:
+                completion_cost = 0
+                prompt_cost = 0
+            self.total_cost += prompt_cost + completion_cost
+        if web_search:
+            self.web_search = web_search
         pass
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
@@ -129,6 +158,7 @@ class ZhipuAICallbackHandler(BaseCallbackHandler):
             completion_cost = 0
             prompt_cost = 0
 
+        web_search = response.llm_output["web_search"]
         # update shared state behind lock
         with self._lock:
             self.total_cost += prompt_cost + completion_cost
@@ -136,6 +166,7 @@ class ZhipuAICallbackHandler(BaseCallbackHandler):
             self.prompt_tokens += prompt_tokens
             self.completion_tokens += completion_tokens
             self.successful_requests += 1
+            self.web_search = web_search
 
     def __copy__(self) -> "ZhipuAICallbackHandler":
         """Return a copy of the callback handler."""

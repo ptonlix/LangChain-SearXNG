@@ -1,5 +1,5 @@
 # The default configuration file.
-# More information about configuration can be found in the documentation: https://docs.deepread.dev/
+# More information about configuration can be found in the documentation: https://github.com/ptonlix/LangChain-SearXNG
 # Syntax in `langchain_searxng/settings/settings.py`
 server:
   env_name: ${APP_ENV:prod}
@@ -10,17 +10,17 @@ server:
     allow_methods: ["*"]
     allow_headers: ["*"]
   auth:
-    enabled: true
+    enabled: false
     # python -c 'import base64; print("Basic " + base64.b64encode("secret:key".encode()).decode())'
     # 'secret' is the username and 'key' is the password for basic auth by default
     # If the auth is enabled, this value must be set in the "Authorization" header of the request.
     secret: "Basic c2VjcmV0OmtleQ=="
 
 llm:
-  mode: openai+zhipuai
+  mode: all
 
 embedding:
-  mode: zhipuai
+  mode: openai
 
 openai:
   temperature: 1

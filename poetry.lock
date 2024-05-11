@@ -1881,19 +1881,19 @@ multidict = ">=4.0"
 
 [[package]]
 name = "zhipuai"
-version = "2.0.1"
+version = "2.0.1.20240423.1"
 description = "A SDK library for accessing big model apis from ZhipuAI"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "zhipuai-2.0.1-py3-none-any.whl", hash = "sha256:738033d95696c3d5117dc4487e37d924e3ebbcdfa0072812b3f63a08ff72274a"},
-    {file = "zhipuai-2.0.1.tar.gz", hash = "sha256:297bbdbe9393da2d1dc8066c39cf39bb2342f170d86f2b7b7a13ba368c53d701"},
+    {file = "zhipuai-2.0.1.20240423.1-py3-none-any.whl", hash = "sha256:d8a560b355730909f5db9460f392428a0b93e01bbefef1f4c63e863b2ca22176"},
+    {file = "zhipuai-2.0.1.20240423.1.tar.gz", hash = "sha256:66d8f16817df98f64baae4a6f2aee6d52f9644098f8f0825b413200f3e608c24"},
 ]
 
 [package.dependencies]
 cachetools = ">=4.2.2"
 httpx = ">=0.23.0"
-pydantic = ">=2.5.2"
+pydantic = ">=1.9.0,<3"
 pyjwt = ">=2.8.0,<2.9.0"
 
 [metadata]

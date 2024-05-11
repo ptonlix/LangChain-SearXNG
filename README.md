@@ -126,22 +126,56 @@ python -m langchain_searxng
 访问: http://localhost:8002/docs 获取 API 信息
 ```
 
+- 搜索问答模式
+
+请求参数：
+
+```shell
+{
+    "question": "目前中国新能源汽车厂商排行榜是什么", #提问问题
+    "chat_history": [], #历史聊天记录
+    "network": true, #是否开启联网
+    "conversation_id": "", #提问的UUID
+    "llm": "zhipuai", #采用的大模型
+    "retriever": "searx" # 采用的召回模式
+
+}
+```
+
+目前支持两种搜索模式 `Searxng` 和 `智谱WebSearch`,这两种模式启用主要根据输入的请求参数`llm`h 和`retriever`控制
+
+**I. 开启 智谱 WebSearch**
+
+```shell
+{
+    ...
+    "llm": "zhipuai", #大模型必须选择zhipuai
+    "retriever": "zhipuwebsearch" #召回模式选择 zhipuwebsearch
+
+}
+```
+
+**Ⅱ. 开启 AI+SearXNG**
+
+```shell
+{
+    ...
+    "llm": "zhipuai", #可选：默认openai,可选zhipuai
+    "retriever": "searx" #可选：默认searx
+
+}
+```
+
+注意： `llm` 选择 zhipuai, 建议后台配置`embedding mode`也选择 zhipuai
+
+## 🆚 搜索模式效果对比
+
+|    能力     | AI+Searxng | 智谱 WebSearch | 360AI 搜索 |
+| :---------: | :--------: | :------------: | :--------: |
+| 🚀 响应速度 |   🌟🌟🌟   |   🌟🌟🌟🌟🌟   |  🌟🌟🌟🌟  |
+| 🚀 内容质量 |   🌟🌟🌟   |     🌟🌟🌟     | 🌟🌟🌟🌟🌟 |
+
 ## 🎸 项目介绍
-
----
-
-### [帝阅介绍](https://dread.run/#/)
-
-> 「帝阅」  
-> 是一款个人专属知识管理与创造的 AI Native 产品  
-> 为用户打造一位专属的侍读助理，帮助提升用户获取知识效率和发挥创造力  
-> 让用户更好地去积累知识、管理知识、运用知识
-
-LangChain-SearXNG 是帝阅项目一个子项目，我们决定开源出来，与大家交流学习
-
-同时，欢迎大家前往体验[帝阅](https://dread.run/#/) 给我们提出宝贵的建议
-
----
 
 <p align="center">
 	<img height=300 src="./docs/pic/yuanli.png">
@@ -183,6 +217,7 @@ LangChain-SearXNG 是帝阅项目一个子项目，我们决定开源出来，�
 - 支持 Token 计算（含 embedding）
 - 支持 openai 和 zhipuai 两种大模型
 - 支持 配置文件动态加载
+- 支持 智谱 AI 新推出的 WebSearch 功能
 
 ## 🚩 Roadmap
 
@@ -190,6 +225,7 @@ LangChain-SearXNG 是帝阅项目一个子项目，我们决定开源出来，�
 - [x] 支持配置文件动态加载，方便更改相关参数
 - [x] 完善 网站页面内容爬取效果
   - [x] 支持网络访问异常处理，方便国内环境使用
+- [x] 支持智谱 WebSearch 功能
 - [ ] 支持更多模型
   - [ ] 在线大模型
   - [ ] 本地大模型
@@ -213,6 +249,21 @@ LangChain-SearXNG 是帝阅项目一个子项目，我们决定开源出来，�
 - 代码贡献  
   ...  
   👏👏👏
+
+---
+
+### [帝阅介绍](https://dread.run/#/)
+
+> 「帝阅」  
+> 是一款个人专属知识管理与创造的 AI Native 产品  
+> 为用户打造一位专属的侍读助理，帮助提升用户获取知识效率和发挥创造力  
+> 让用户更好地去积累知识、管理知识、运用知识
+
+LangChain-SearXNG 是帝阅项目一个子项目，我们决定开源出来，与大家交流学习
+
+同时，欢迎大家前往体验[帝阅](https://dread.run/#/) 给我们提出宝贵的建议
+
+---
 
 <p align="center">
 	<img height=160 src="./docs/pic/logo.jpg"/><br> 
