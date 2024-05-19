@@ -30,6 +30,7 @@ from langchain.prompts import (
 from langchain.schema.output_parser import StrOutputParser
 from langchain_core.output_parsers import JsonOutputParser
 from langchain.schema.document import Document
+from langchain_core.utils.function_calling import convert_to_openai_tool
 from operator import itemgetter
 from datetime import datetime
 
@@ -124,7 +125,7 @@ def searxng_search(
     return result
 
 
-def categorized_results(data: Any) -> List[Document]:  # Dict[str, List[Dict]] | None:
+def categorized_results(data: Any) -> List[Document]:
     try:
         index_list = json.loads(data.get("select"))  # 选择最合适的网站URL
         search_result = data.get("search")
@@ -313,16 +314,16 @@ def check_urls_access(urls: list[str]) -> list[str]:
 
 def format_result(results: List[Dict]) -> str:
     formatted_docs = []
-    formatted_docs_str = 0
+    formatted_docs_str = ""
     for i, result in enumerate(results):
         content = result.get("content")
         doc_string = f"<doc id='{i}'>{content}</doc>"
         formatted_docs.append(doc_string)
         formatted_docs_str = "\n".join(formatted_docs)
-        if len(formatted_docs_str) >= 20000:  # 一次请求不能超过20000字节，减少Token消耗
-            logger.info("formatted_docs is too long.")
+        if len(formatted_docs_str) >= 10000:  # 一次请求不能超过20000字节，减少Token消耗
+            logger.info("select formatted_docs is too long.")
             break
-    logger.info(f"formatted_docs length: {len(formatted_docs_str)} done")
+    logger.info(f"select formatted_docs length: {len(formatted_docs_str)} done")
     return formatted_docs_str
 
 
@@ -334,7 +335,7 @@ def create_seaxng_retriever_v2(llm: BaseLanguageModel) -> Runnable:
         SELECT_BEST_RESULT_TEMPLATE
     ).partial(current_date=datetime.now().isoformat())
 
-    llm_with_tools = llm.bind_tools([searxng_search])
+    llm_with_tools = llm.bind(tools=[convert_to_openai_tool(searxng_search)])
 
     _search = (
         RunnablePassthrough()

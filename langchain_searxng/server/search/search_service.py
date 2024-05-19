@@ -1,4 +1,3 @@
-from math import log
 from injector import inject
 from langchain_searxng.components.llm.llm_component import LLMComponent
 from langchain_searxng.components.embedding.embedding_component import (
@@ -7,9 +6,6 @@ from langchain_searxng.components.embedding.embedding_component import (
 from langchain_searxng.components.searxng.searxng_component import (
     SearXNGComponent,
     DocSource,
-)
-from langchain_searxng.components.searxng.searxng_custom import (
-    create_seaxng_retriever_v2,
 )
 from langchain_searxng.components.trace.trace_component import TraceComponent
 from langchain_searxng.server.search.search_prompt import (
@@ -29,7 +25,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.retrievers.document_compressors import (
     DocumentCompressorPipeline,
     EmbeddingsFilter,
-    LLMChainFilter,
     LLMChainExtractor,
 )
 from langchain.retrievers import (
@@ -315,10 +310,19 @@ class SearchService:
 
     def format_docs(self, docs: Sequence[Document]) -> str:
         formatted_docs = []
+        formatted_docs_str = ""
         for i, doc in enumerate(docs):
-            doc_string = f"<doc id='{i}'>{doc.page_content}</doc>"
+            content = doc.page_content
+            doc_string = f"<doc id='{i}'>{content}</doc>"
             formatted_docs.append(doc_string)
-        return "\n".join(formatted_docs)
+            formatted_docs_str = "\n".join(formatted_docs)
+            if (
+                len(formatted_docs_str) >= 20000
+            ):  # 一次请求不能超过20000字节，减少Token消耗
+                logger.info("answer formatted_docs is too long.")
+                break
+        logger.info(f"answer formatted_docs length: {len(formatted_docs_str)} done")
+        return formatted_docs_str
 
     """
     判断聊天长度是否超过模型输入的窗口大小
