@@ -1,5 +1,9 @@
 ## 配置文件说明
 
+- V1 标识 只有使用 v1 版本搜索接口才使用
+- V2 标识 只有使用 v2 版本搜索接口才使用
+- 未标识表示则表示公用
+
 ```yaml
 # 服务器配置
 server:
@@ -15,14 +19,16 @@ server:
     secret: "Basic c2VjcmV0OmtleQ==" # Http Authorization认证
 
 # 大模型配置
-# 选项有4个 openai zhipuai mock openai+zhipuai
-# openai+zhipuai 表示同时支持两个模型，根据API传入参数决定使用哪个大模型
+# 选项有4个 "openai", "zhipuai", "zhipuwebsearch", "all", "mock"
+# all表示同时支持3️个模型，根据API传入参数决定使用哪个大模型
+# zhipuwebsearch 为智谱搜索定制模型
 llm:
-  mode: openai+zhipuai
+  mode: all
 
 # 向量模型
 # 选项有3个 openai zhipuai mock
 # 国内环境建议选择zhipuai比较稳定
+# V1版本
 embedding:
   mode: zhipuai
 
@@ -39,6 +45,7 @@ zhipuai:
   top_p: 0.6
   modelname: "glm-3-turbo"
   api_key: ${ZHIPUAI_API_KEY:}
+  api_base: ${ZHIPUAI_API_BASE:}
 
 # LangSmith调试参数
 # 详情见 https://smith.langchain.com
@@ -50,11 +57,11 @@ langsmith:
 # 详情见 https://docs.searxng.org
 searxng:
   host: ${SEARX_HOST:} # SearXNG请求地址
-  language: "zh-CN" #搜索语言 英文 en-US
-  safesearch: 1 #搜索安全级别,内容过滤 0无限制 1为中级 2严格
-  categories: "general" #搜索分类 [ general images videos news map music it science files social media]
+  language: "zh-CN" #搜索语言 英文 en-US # V1版本
+  safesearch: 1 #搜索安全级别,内容过滤 0无限制 1为中级 2严格 # V1版本
+  categories: "general" #搜索分类 [ general images videos news map music it science files social media] # V1版本
   engines: ["bing", "brave", "duckduckgo"] # 搜索引擎 google、yahoo 等
-  num_results: 3 # 搜索结果个数
+  num_results: 3 # 搜索结果个数 # V1版本
 ```
 
 ## 私有配置文件

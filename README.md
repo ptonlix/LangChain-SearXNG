@@ -151,7 +151,7 @@ python -m langchain_searxng
 ```shell
 {
     ...
-    "llm": "zhipuwebsearch", #大模型必须选择zhipuai
+    "llm": "zhipuwebsearch", #大模型必须选择zhipuwebsearch (智谱搜索定制模型)
     "retriever": "zhipuwebsearch" #召回模式选择 zhipuwebsearch
 
 }
@@ -167,8 +167,6 @@ python -m langchain_searxng
 
 }
 ```
-
-注意： `llm` 选择 zhipuai, 建议后台配置`embedding mode`也选择 zhipuai
 
 ## 🆚 搜索模式效果对比
 
@@ -231,6 +229,7 @@ python -m langchain_searxng
 - [x] 完善 网站页面内容爬取效果
   - [x] 支持网络访问异常处理，方便国内环境使用
 - [x] 支持智谱 WebSearch 功能
+- [x] 升级 SearXNG 搜索问题,支持更快更精准的回答
 - [ ] 支持更多模型
   - [ ] 在线大模型
   - [ ] 本地大模型
