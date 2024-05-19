@@ -84,7 +84,7 @@ class LLMSettings(BaseModel):
 
 
 class EmbeddingSettings(BaseModel):
-    mode: Literal["local", "openai", "zhipuai", "mock"]
+    mode: Literal["local", "openai", "zhipuai", "zhipuwebsearch", "mock"]
 
 
 class OpenAISettings(BaseModel):
@@ -99,10 +99,12 @@ class ZhipuAISettings(BaseModel):
     top_p: float
     modelname: str
     api_key: str
+    api_base: str
 
 
 class LangSmithSettings(BaseModel):
     trace_version_v2: bool
+    langchain_project: str
     api_key: str
 
 

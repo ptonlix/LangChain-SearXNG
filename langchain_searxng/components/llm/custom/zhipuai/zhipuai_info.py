@@ -157,8 +157,7 @@ class ZhipuAICallbackHandler(BaseCallbackHandler):
         else:
             completion_cost = 0
             prompt_cost = 0
-
-        web_search = response.llm_output["web_search"]
+        web_search = response.llm_output.get("web_search")
         # update shared state behind lock
         with self._lock:
             self.total_cost += prompt_cost + completion_cost

@@ -2,6 +2,9 @@ import logging
 
 from injector import inject
 from langchain_searxng.settings.settings import Settings, SearXNGSettings
+from langchain_searxng.components.searxng.searxng_custom import (
+    create_seaxng_retriever_v2,
+)
 from langchain_community.utilities.searx_search import SearxSearchWrapper
 from langchain.callbacks.manager import CallbackManagerForRetrieverRun
 from langchain.schema.retriever import BaseRetriever
@@ -33,6 +36,7 @@ class SearXNGComponent:
             search=SearxSearchWrapper(searx_host=self.searxng.host),
             searxng=self.searxng,
         )
+        self.search_retriever_v2 = create_seaxng_retriever_v2
 
 
 class SearXNGRetriever(BaseRetriever):

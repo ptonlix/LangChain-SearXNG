@@ -33,9 +33,11 @@ zhipuai:
   top_p: 0.6
   modelname: "glm-3-turbo"
   api_key: ${ZHIPUAI_API_KEY:}
+  api_base: ${ZHIPUAI_API_BASE:}
 
 langsmith:
   trace_version_v2: true
+  langchain_project: langchain-searxng
   api_key: ${LANGCHAIN_API_KEY:}
 
 searxng:

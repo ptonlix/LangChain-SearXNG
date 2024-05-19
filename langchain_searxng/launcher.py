@@ -9,7 +9,10 @@ from fastapi.openapi.utils import get_openapi
 from injector import Injector
 from langchain_searxng.paths import docs_path
 from langchain_searxng.settings.settings import Settings
-from langchain_searxng.server.search.search_router import search_router
+from langchain_searxng.server.search.search_router import (
+    search_router,
+    search_router_v2,
+)
 from langchain_searxng.server.health.health_router import health_router
 from langchain_searxng.server.config.config_router import (
     config_router_no_auth,
@@ -74,6 +77,7 @@ def create_app(root_injector: Injector) -> FastAPI:
         app.openapi = custom_openapi  # type: ignore[method-assign]
 
         app.include_router(search_router)
+        app.include_router(search_router_v2)
         app.include_router(health_router)
         app.include_router(config_router_no_auth)
         app.include_router(config_router)

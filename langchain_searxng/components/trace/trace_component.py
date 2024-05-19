@@ -15,6 +15,7 @@ class TraceComponent:
     @inject
     def __init__(self, settings: Settings) -> None:
         os.environ["LANGCHAIN_TRACING_V2"] = str(settings.langsmith.trace_version_v2)
+        os.environ["LANGCHAIN_PROJECT"] = str(settings.langsmith.langchain_project)
         os.environ["LANGCHAIN_API_KEY"] = settings.langsmith.api_key
         self.trace_client = Client(api_key=settings.langsmith.api_key)
 

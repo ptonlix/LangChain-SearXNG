@@ -10,6 +10,8 @@ from langchain_searxng.server.search.search_service import (
 from langchain_searxng.server.search.search_handler import (
     zhipuai_event_generator,
     searxng_event_generator,
+    searxng_event_generator_v2,
+    searxng_invoke_v2,
     searxng_invoke,
     zhipuai_invoke,
     SearchResponse,
@@ -25,6 +27,38 @@ from uuid import UUID
 logger = logging.getLogger(__name__)
 
 search_router = APIRouter(prefix="/v1", dependencies=[Depends(authenticated)])
+search_router_v2 = APIRouter(prefix="/v2", dependencies=[Depends(authenticated)])
+
+
+@search_router_v2.post(
+    "/search/sse",
+    tags=["Search"],
+)
+async def search_sse_v2(request: Request, body: SearchRequest):
+    """
+    Streaming search results over http sse
+    """
+    service = request.state.injector.get(SearchService)
+    if check_search_mode(body, service):
+        return EventSourceResponse(zhipuai_event_generator(request, body, service))
+    else:
+        return EventSourceResponse(searxng_event_generator_v2(request, body, service))
+
+
+@search_router_v2.post(
+    "/search/invoke",
+    response_model=RestfulModel[SearchResponse | int | None],
+    tags=["Search"],
+)
+async def search_invoke_v2(request: Request, body: SearchRequest) -> RestfulModel:
+    """
+    Call directly to return search results
+    """
+    service = request.state.injector.get(SearchService)
+    if check_search_mode(body, service):
+        return await zhipuai_invoke(request, body, service)
+    else:
+        return await searxng_invoke_v2(request, body, service)
 
 
 @search_router.post(
@@ -37,10 +71,7 @@ async def search_invoke(request: Request, body: SearchRequest) -> RestfulModel:
     Call directly to return search results
     """
     service = request.state.injector.get(SearchService)
-    if check_search_mode(body, service):
-        return await zhipuai_invoke(request, body, service)
-    else:
-        return await searxng_invoke(request, body, service)
+    return await searxng_invoke(request, body, service)
 
 
 @search_router.post(
@@ -52,10 +83,7 @@ async def search_sse(request: Request, body: SearchRequest):
     Streaming search results over http sse
     """
     service = request.state.injector.get(SearchService)
-    if check_search_mode(body, service):
-        return EventSourceResponse(zhipuai_event_generator(request, body, service))
-    else:
-        return EventSourceResponse(searxng_event_generator(request, body, service))
+    return EventSourceResponse(searxng_event_generator(request, body, service))
 
 
 @search_router.post(

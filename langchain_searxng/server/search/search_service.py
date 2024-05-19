@@ -1,3 +1,4 @@
+from math import log
 from injector import inject
 from langchain_searxng.components.llm.llm_component import LLMComponent
 from langchain_searxng.components.embedding.embedding_component import (
@@ -6,6 +7,9 @@ from langchain_searxng.components.embedding.embedding_component import (
 from langchain_searxng.components.searxng.searxng_component import (
     SearXNGComponent,
     DocSource,
+)
+from langchain_searxng.components.searxng.searxng_custom import (
+    create_seaxng_retriever_v2,
 )
 from langchain_searxng.components.trace.trace_component import TraceComponent
 from langchain_searxng.server.search.search_prompt import (
@@ -25,6 +29,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.retrievers.document_compressors import (
     DocumentCompressorPipeline,
     EmbeddingsFilter,
+    LLMChainFilter,
+    LLMChainExtractor,
 )
 from langchain.retrievers import (
     ContextualCompressionRetriever,
@@ -56,16 +62,6 @@ from typing import (
 
 
 logger = logging.getLogger(__name__)
-
-
-class GPTResponse(BaseModel):
-    summary: str
-    content: list[str]
-    title: str
-    outline: list[dict]
-    tags: list[str]
-    qa: list[str]
-    recommends: list[str]
 
 
 class TokenInfo(BaseModel):
@@ -100,7 +96,7 @@ class SearchRequest(BaseModel):
 
 
 """
-读取chain run_id的回调
+读取chain run_id的回调和引用文章信息
 """
 
 
@@ -108,6 +104,8 @@ class ReadRunIdAsyncHandler(AsyncCallbackHandler):
 
     def __init__(self):
         self.runid: UUID = None
+        self.search_list = []
+        self.source_doc_list = []
 
     async def on_chain_start(
         self,
@@ -124,6 +122,24 @@ class ReadRunIdAsyncHandler(AsyncCallbackHandler):
         if not self.runid:
             self.runid = run_id
 
+    async def on_chain_end(
+        self,
+        outputs: Dict[str, Any],
+        *,
+        run_id: UUID,
+        parent_run_id: Optional[UUID] = None,
+        tags: Optional[List[str]] = None,
+        **kwargs: Any,
+    ) -> None:
+        """Run when chain ends running."""
+        if (
+            "branch:default" in tags
+            and isinstance(outputs, List)
+            and all(isinstance(item, Document) for item in outputs)
+        ):
+            for doc in outputs:
+                self.source_doc_list.append(doc.metadata)
+
     async def on_chat_model_start(
         self,
         serialized: Dict[str, Any],
@@ -136,21 +152,27 @@ class ReadRunIdAsyncHandler(AsyncCallbackHandler):
         **kwargs: Any,
     ) -> Any: ...
 
-    async def on_retriever_end(
+    async def on_tool_end(
         self,
-        documents: Sequence[Document],
+        output: Any,
         *,
         run_id: UUID,
         parent_run_id: Optional[UUID] = None,
         tags: Optional[List[str]] = None,
         **kwargs: Any,
     ) -> None:
-        """Run on retriever end."""
-        # TODO 目前没有合适过滤选项，获取原文链接还是采用全局变量获取
-        ...
+        """Run when tool ends running."""
+        # logger.info(output)
+        self.search_list = output
 
     def get_runid(self) -> UUID:
         return self.runid
+
+    def get_source_doc(self) -> List[Dict]:
+        return self.source_doc_list
+
+    def get_search_result(self) -> List[Dict]:
+        return self.search_list
 
 
 class CalTokenNumAsyncHandler(AsyncCallbackHandler):
@@ -208,7 +230,11 @@ class SearchService:
         self.trace_service = trace_component
         self.chain = self.create_chain(
             self.llm_service.llm,
-            self.get_searx_retriever(self.embedding_service.embedding),
+            self.get_searx_retriever_by_llm(self.llm_service.llm),
+        )
+        self.chain_v2 = self.create_chain(
+            self.llm_service.llm,
+            self.searxng_service.search_retriever_v2(self.llm_service.llm),
         )
         self.zhipu_chain = self.create_zhipu_chain(self.llm_service.llm)
 
@@ -218,8 +244,22 @@ class SearchService:
         num_tokens = len(encoding.encode(string))
         return num_tokens
 
-    def get_searx_retriever(self, embeddings: Embeddings):
-        splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=20)
+    def get_searx_retriever_by_llm(self, llm: BaseLanguageModel):
+        compressor = LLMChainExtractor.from_llm(llm)
+
+        base_searx_retriever = self.searxng_service.search_retriever
+        searx_retriever = ContextualCompressionRetriever(
+            base_compressor=compressor, base_retriever=base_searx_retriever
+        )
+        return searx_retriever.configurable_alternatives(
+            # This gives this field an id
+            # When configuring the end runnable, we can then use this id to configure this field
+            ConfigurableField(id="retriever"),
+            default_key="searx",
+        ).with_config(run_name="FinalSourceRetriever")
+
+    def get_searx_retriever_by_embed(self, embeddings: Embeddings):
+        splitter = RecursiveCharacterTextSplitter(chunk_size=4096, chunk_overlap=0)
         relevance_filter = EmbeddingsFilter(
             embeddings=embeddings, similarity_threshold=0.8
         )
@@ -346,7 +386,6 @@ class SearchService:
         ).with_config(
             run_name="GenerateResponse",
         )
-
         return {
             "question": RunnableLambda(itemgetter("question")).with_config(
                 run_name="Itemgetter:question"
@@ -386,17 +425,11 @@ class SearchService:
     def convert_zhipu_to_docsource(
         self, websearch: List[Dict[str, str]]
     ) -> List[DocSource]:
-        result = []
         try:
             for obj in websearch:
-                result.append(
-                    DocSource(
-                        title=obj.get("title"),
-                        source_link=obj.get("link"),
-                        description=obj.get("content"),
-                    )
-                )
-            return result
+                if "link" in obj:
+                    obj["url"] = obj.pop("link")
+            return websearch
         except Exception:
             return []
 
