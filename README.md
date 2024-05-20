@@ -103,12 +103,14 @@ poetry install # 安装依赖
 
 配置文件录入或通过环境变量设置以下变量
 
+# 根据自身环境选择合适的 大模型API
 # OPENAI 大模型API
 OPENAI_API_BASE
 OPENAI_API_KEY
 
 # ZHIPUAI 智谱API
 ZHIPUAI_API_KEY
+ZHIPUAI_API_BASE
 
 # LangChain调试 API
 LANGCHAIN_API_KEY
