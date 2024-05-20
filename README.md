@@ -195,7 +195,7 @@ python -m langchain_searxng
 [v1 版本介绍](./docs/searxngv1.md)
 
 <p align="center">
-	<img height=500 src="./docs/pic/searxngv2.png"><br>
+	<img height=780 src="./docs/pic/searxngv2.png"><br>
   <b face="雅黑">AI+SearXNG v2版本工作流</b>
 </p>
 
