@@ -18,6 +18,10 @@
 <img alt="license" src="https://img.shields.io/badge/license-Apache-lightgrey"/>
 </p>
 
+🌟🌟🌟  
+**重要更新： LangChain-SearXNG 全面升级到 v2 版本, 支持更快搜索更精准问答**🚀🔥💥  
+🌟🌟🌟
+
 ## 🚀 Quick Install
 
 ### 1. 部署 SearXNG
@@ -176,24 +180,44 @@ python -m langchain_searxng
 | 📝 内容质量 |              🌟🌟🌟               |              🌟🌟🌟🌟               |                🌟🌟🌟                 |             🌟🌟🌟🌟🌟              |
 | 💦 流式响应 | 1. 搜索过程支持<br>2.搜索结果支持 | 1. 搜索过程支持 <br> 2.搜索结果支持 | 1. 搜索过程不支持 <br> 2.搜索结果支持 | 1. 搜索过程支持 <br> 2.搜索结果支持 |
 
+`AI+SearXNGv2`相较于上个版本从响应速度和内容质量均有明显提升，距离 360AI 搜索跟进一步了 💪
+
 详细评测分析: [AI 搜索模式对比测试](./docs/modevs.md)
 
-## 🎸 项目介绍
+## ⛓️ 项目介绍
+
+> 本项目通过构建 SearXNG 搜索引擎 Tool + LangChain LCEL 调用方式构建-AI 搜索引擎 Agent，以 Fastapi 对外提供服务
+
+### 1.AI+SearXNGv2 工作流介绍
+
+[v1 版本介绍](./docs/searxngv1.md)
 
 <p align="center">
-	<img height=300 src="./docs/pic/yuanli.png">
+	<img height=500 src="./docs/pic/searxngv2.png"><br>
+  <b face="雅黑">AI+SearXNG v2版本工作流</b>
 </p>
 
-目前 LLM Agent 本质上都是使用了 Prompt+Tool 两个方面的能力
-以我们 AI 搜索引擎 Agent 为例：
+- 通过用户输入的参数控制搜索工作流程，主流程分为`联网搜索问答`和`模型内搜索问答`
+- `模型内搜索问答`: 通过获取用户输入`chat_history` `question` 构建 Prompt 输入到 LLM 生成问答结果并返回
+- `联网搜索问答`: 主要分为三个部分 `condense question chain` `搜索召回` `response synthesizer chain`
 
-1. 将根据用户搜索关键词，去调用 Tool 收集信息
-2. 将收集到的信息通过与 system prompt 等提示词组合，输入到大模型
-3. 大模型将依据收集到的上下文，提供更符合用户要求的搜索答案
+  1.  如果输入的 chat_history 不为空，则进入`condense question chain` 工作流，根据聊天上下文生成最合适的搜索 query
+  2.  通过 query 进入`搜索召回` 工作流:分为 `searxng search` `select  search result` `Data processing`三个部分
 
-本项目通过构建 SearXNG 搜索引擎 Tool + LangChain LCEL 调用方式构成-AI 搜索引擎 Agent，以 Fastapi 对外提供服务
+  - 通过 LLM 根据搜索 query 选择最合适的 searxng 搜索参数，调用 searxng api 搜索结果（通常 20 ～ 30 个搜索结果）
+  - 再根据上一步搜索到的结果，通过 LLM 进一步筛选出最合适回答该 query 的搜索结果，通常 6 个
+  - 根据确定最合适的搜索结果，进行数据处理：检查可访问性->获取 html->生成 Documents ->format 格式化，最终输出问答上下文`context`
 
-### 1. 目录结构
+  3.  通过`搜索召回`的上下文 `context`和用户输入的`chat_history` `question`一起进入`response synthesizer chain`工作流，最终生成搜索响应
+
+**v2 对比 v1 版本的差别**
+
+1. v1 版本主要是搜索获取数据，再通过过滤筛选出最佳数据，但如果一开始源数据质量不佳，则后续工作效果就会大减，而且基础源数据数量不多，向量化过滤时间很长。
+2. v2 版本一个主要原则是确保源数据质量，搜索结果尽可能符合搜索关键字，所以精心构建了搜索召回工作流，让大模型参与获取最佳搜索结果。同时由于已经筛选出最佳搜索数据，不需要向量化过滤，可以直接 LLM 让生成结果。（Token 越来越便宜也是一大趋势）
+3. v2 版本还优化了搜索网页加载流程，尽可能快的获取到搜索数据
+4. v2 版本增加搜索过程可视化，在流式返回中，可以动态显示搜索进度，展示更丰富的内容
+
+### 2. 目录结构
 
 ```
 ├── docs  # 文档
@@ -213,7 +237,7 @@ python -m langchain_searxng
 ├── log # 日志目录
 ```
 
-### 2. 功能介绍
+### 3. 功能介绍
 
 - 支持查询结果 http sse 流式和非流式（整体）返回
 - 支持联网查询 QA 和直接 QA 切换
