@@ -31,7 +31,7 @@ class SearchResponse(BaseModel):
     answer: str
     soucre: List[Any]
     searchresult: List[Any]
-    tokeninfo: TokenInfo
+    token_info: TokenInfo
 
 
 """
@@ -135,7 +135,7 @@ async def searxng_event_generator(
         logger.info(f"embedding token: {embed_tokens}")
 
         yield SearchSseResponse(
-            event="tokeninfo", data=calltoken.get_token_info(embed_tokens)
+            event="token_info", data=calltoken.get_token_info(embed_tokens)
         ).model_dump()
 
     except Exception as e:
@@ -190,7 +190,7 @@ async def searxng_invoke(
 
             resobj = SearchResponse(
                 run_id=read_runid.get_runid(),
-                tokeninfo=tokeninfo,
+                token_info=tokeninfo,
                 answer=result,
                 soucre=[
                     docs.copy()
@@ -272,7 +272,7 @@ async def zhipuai_event_generator(
                 total_cost=cb.total_cost,
             )
 
-            yield SearchSseResponse(event="tokeninfo", data=tokeninfo).model_dump()
+            yield SearchSseResponse(event="token_info", data=tokeninfo).model_dump()
 
     except Exception as e:
         logger.exception(e)
@@ -322,7 +322,7 @@ async def zhipuai_invoke(
 
             resobj = SearchResponse(
                 run_id=read_runid.get_runid(),
-                tokeninfo=tokeninfo,
+                token_info=tokeninfo,
                 answer=result,
                 soucre=service.convert_zhipu_to_docsource(cb.web_search),
                 searchresult=[],
@@ -387,7 +387,7 @@ async def searxng_invoke_v2(
 
             resobj = SearchResponse(
                 run_id=searxng_v2_cb.get_runid(),
-                tokeninfo=tokeninfo,
+                token_info=tokeninfo,
                 answer=result,
                 soucre=searxng_v2_cb.get_source_doc(),
                 searchresult=searxng_v2_cb.get_search_result(),
@@ -480,7 +480,7 @@ async def searxng_event_generator_v2(
         logger.info(f"embedding token: {embed_tokens}")
 
         yield SearchSseResponse(
-            event="tokeninfo", data=calltoken.get_token_info(embed_tokens)
+            event="token_info", data=calltoken.get_token_info(embed_tokens)
         ).model_dump()
 
     except Exception as e:
