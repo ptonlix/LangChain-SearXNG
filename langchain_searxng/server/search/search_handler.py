@@ -29,7 +29,7 @@ search_router = APIRouter(prefix="/v1", dependencies=[Depends(authenticated)])
 class SearchResponse(BaseModel):
     run_id: UUID
     answer: str
-    soucre: List[Any]
+    source: List[Any]
     searchresult: List[Any]
     token_info: TokenInfo
 
@@ -192,7 +192,7 @@ async def searxng_invoke(
                 run_id=read_runid.get_runid(),
                 token_info=tokeninfo,
                 answer=result,
-                soucre=[
+                source=[
                     docs.copy()
                     for docs in service.searxng_service.search_retriever.get_docsource_list()
                 ],
@@ -324,7 +324,7 @@ async def zhipuai_invoke(
                 run_id=read_runid.get_runid(),
                 token_info=tokeninfo,
                 answer=result,
-                soucre=service.convert_zhipu_to_docsource(cb.web_search),
+                source=service.convert_zhipu_to_docsource(cb.web_search),
                 searchresult=[],
             )
             return RestfulModel(data=resobj)
@@ -389,7 +389,7 @@ async def searxng_invoke_v2(
                 run_id=searxng_v2_cb.get_runid(),
                 token_info=tokeninfo,
                 answer=result,
-                soucre=searxng_v2_cb.get_source_doc(),
+                source=searxng_v2_cb.get_source_doc(),
                 searchresult=searxng_v2_cb.get_search_result(),
             )
             # service.searxng_service.search_retriever.clear_docsource_list()
