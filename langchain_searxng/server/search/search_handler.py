@@ -258,22 +258,13 @@ async def zhipuai_event_generator(
 
             yield SearchSseResponse(event="complete", data=final_output).model_dump()
 
-            tokeninfo = TokenInfo(
-                model=body.llm,
-                total_tokens=cb.total_tokens,
-                prompt_tokens=cb.prompt_tokens,
-                completion_tokens=cb.completion_tokens,
-                successful_requests=cb.successful_requests,
-                total_cost=cb.total_cost,
-            )
-
             yield SearchSseResponse(
                 event="source_complete",
                 data=service.convert_zhipu_to_docsource(cb.web_search),
             ).model_dump()
 
             tokeninfo = TokenInfo(
-                model=body.llm,
+                model="zhipuai",
                 total_tokens=cb.total_tokens,
                 prompt_tokens=cb.prompt_tokens,
                 completion_tokens=cb.completion_tokens,
@@ -321,7 +312,7 @@ async def zhipuai_invoke(
             )
 
             tokeninfo = TokenInfo(
-                model=body.llm,
+                model="zhipuai",
                 total_tokens=cb.total_tokens,
                 prompt_tokens=cb.prompt_tokens,
                 completion_tokens=cb.completion_tokens,
