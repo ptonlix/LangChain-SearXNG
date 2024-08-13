@@ -19,6 +19,7 @@ html2text = "^2024.2.26"
 fake-useragent = "^1.5.1"
 watchfiles = "^0.21.0"
 langchain-openai = "^0.1.6"
+bilibili-api-python = "^16.2.0"
 
 
 [build-system]

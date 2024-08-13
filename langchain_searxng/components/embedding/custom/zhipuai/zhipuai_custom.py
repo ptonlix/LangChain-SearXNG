@@ -1,4 +1,3 @@
-from itertools import count
 from typing import Any, Dict, List, Optional
 
 from langchain_core.embeddings import Embeddings
