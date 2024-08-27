@@ -62,9 +62,9 @@ def load_active_settings() -> dict[str, Any]:
 
 def get_active_settings() -> List[dict[str, Any]]:
     """Load active profiles and merge them."""
-    loaded_profiles = [
-        {profile: load_settings_from_profile(profile)} for profile in active_profiles
-    ]
+    loaded_profiles = {
+        profile: load_settings_from_profile(profile) for profile in active_profiles
+    }
 
     return loaded_profiles
 

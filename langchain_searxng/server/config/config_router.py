@@ -21,7 +21,7 @@ config_router = APIRouter(prefix="/v1", dependencies=[Depends(authenticated)])
 
 @config_router_no_auth.get(
     "/config",
-    response_model=RestfulModel[List[Dict]],
+    response_model=RestfulModel[Dict],
     tags=["Config"],
 )
 async def get_config(request: Request) -> RestfulModel:
@@ -39,10 +39,9 @@ async def get_config(request: Request) -> RestfulModel:
 )
 async def edit_config(request: Request, body: List[Dict]) -> RestfulModel:
     try:
-        for config_dict in body:
-            for profile, config in config_dict.items():
-                print(profile, config)
-                save_active_settings(profile, config)
+        for profile, config in body.items():
+            print(profile, config)
+            save_active_settings(profile, config)
 
         return RestfulModel(data=None)
     except Exception as e:

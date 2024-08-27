@@ -94,6 +94,13 @@ class OpenAISettings(BaseModel):
     api_base: str
 
 
+class DeepSeekSettings(BaseModel):
+    temperature: float
+    modelname: str
+    api_key: str
+    api_base: str
+
+
 class ZhipuAISettings(BaseModel):
     temperature: float
     top_p: float
@@ -122,6 +129,7 @@ class Settings(BaseModel):
     llm: LLMSettings
     embedding: EmbeddingSettings
     openai: OpenAISettings
+    deepseek: DeepSeekSettings
     zhipuai: ZhipuAISettings
     langsmith: LangSmithSettings
     searxng: SearXNGSettings

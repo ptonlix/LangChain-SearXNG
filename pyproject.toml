@@ -10,7 +10,7 @@ python = "^3.10"
 langchain = "^0.1.15"
 fastapi = "^0.110.1"
 injector = "^0.21.0"
-tiktoken = "^0.6.0"
+tiktoken = "^0.7.0"
 sse-starlette = "^2.1.0"
 openai = "^1.23.1"
 zhipuai = "^2.0.1"
@@ -20,6 +20,8 @@ fake-useragent = "^1.5.1"
 watchfiles = "^0.21.0"
 langchain-openai = "^0.1.6"
 bilibili-api-python = "^16.2.0"
+streamlit = "^1.37.1"
+sseclient-py = "^1.8.0"
 
 
 [build-system]

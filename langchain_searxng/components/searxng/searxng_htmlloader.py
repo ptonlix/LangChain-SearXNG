@@ -3,7 +3,7 @@ import asyncio
 import logging
 from concurrent.futures import ThreadPoolExecutor
 import multiprocessing
-from typing import List, cast
+from typing import List, cast, Tuple
 
 import aiohttp
 from langchain_core.documents import Document
@@ -13,6 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 class SearXNGAsyncHtmlLoader(AsyncHtmlLoader):
+
+    def __init__(self, web_paths: List[str], *args, **kwargs):
+        super().__init__(web_paths, *args, **kwargs)
+        self.semaphore = asyncio.Semaphore(5)  # 限制最多5个并发请求
 
     async def _fetch(
         self,
@@ -50,6 +54,21 @@ class SearXNGAsyncHtmlLoader(AsyncHtmlLoader):
                             f"{i + 1}/{retries}: {e}. Retrying..."
                         )
                         await asyncio.sleep(cooldown * backoff**i)
+
+    async def _fetch_with_rate_limit(self, url: str) -> Tuple[str, str]:
+        async with self.semaphore:
+            return await self._fetch(url)
+
+    async def fetch_all(self, urls: List[str]) -> List[Tuple[str, str]]:
+        tasks = [self._fetch_with_rate_limit(url) for url in urls]
+        results = []
+        for task in asyncio.as_completed(tasks):
+            try:
+                result = await task
+                results.append(result)
+            except Exception as e:
+                logger.warning(f"Error fetching URL: {str(e)}")
+        return results
 
     def load(self) -> List[Document]:
         """Load text from the url(s) in web_path."""

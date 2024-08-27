@@ -24,9 +24,15 @@ embedding:
 
 openai:
   temperature: 1
-  modelname: "gpt-3.5-turbo-0125" #"gpt-3.5-turbo-1106"
+  modelname: "gpt-3.5-turbo-0125"
   api_base: ${OPENAI_API_BASE:}
   api_key: ${OPENAI_API_KEY:}
+
+deepseek:
+  temperature: 1
+  modelname: "deepseek-chat"
+  api_key: ${DEEPSEEK_API_KEY:}
+  api_base: ${DEEPSEEK_API_BASE:}
 
 zhipuai:
   temperature: 0.95

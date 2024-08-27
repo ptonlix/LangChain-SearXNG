@@ -12,6 +12,7 @@ from langchain_searxng.components.searxng.searxng_prompt import (
 )
 from langchain.schema.language_model import BaseLanguageModel
 from enum import Enum
+
 import httpx
 import logging
 import asyncio
@@ -33,6 +34,8 @@ from langchain.schema.document import Document
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from operator import itemgetter
 from datetime import datetime
+import ssl
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -127,16 +130,16 @@ def searxng_search(
 
 def categorized_results(data: Any) -> List[Document]:
     try:
-        index_list = json.loads(data.get("select"))  # 选择最合适的网站URL
-        search_result = data.get("search")
-        if not (index_list and search_result):
-            return None
+        index_list = data.get("select", [])
+        search_result = data.get("search", [])
+        if not index_list or not search_result:
+            logger.warning("No valid search results or index list found.")
+            return []
 
         results = [search_result[i] for i in index_list if i < len(search_result)]
-        logger.info(f"Select Search index: {index_list} \n\nresults: {results}")
+        logger.info(f"Select Search index: {index_list}  results: {results}")
 
         accessible_urls = check_urls_access([res["url"] for res in results])
-
         accessible_results = []
         for res in results:
             if res["url"] in accessible_urls:
@@ -146,25 +149,32 @@ def categorized_results(data: Any) -> List[Document]:
         for res in accessible_results:
             if res.get("url", None):
                 urls_to_look.append(res["url"])
+
         logger.info(f"Accessible Result urls: {urls_to_look}")
         loader = SearXNGAsyncHtmlLoader(
             urls_to_look,
             ignore_load_errors=True,
             verify_ssl=False,
-            requests_per_second=6,
-            requests_kwargs={"timeout": 2},
+            requests_per_second=3,
+            requests_kwargs={"timeout": 5},
         )
         html2text = Html2TextTransformer()
+
         logger.info("Indexing new urls...")
         docs = loader.load()
+        if not docs:
+            logger.warning("No documents loaded from URLs.")
+            return []
+
         docs = list(html2text.transform_documents(docs))
+
         for i in range(len(docs)):
             docs[i].metadata.update(accessible_results[i])
 
-        logger.info(f"Get {len(docs)} html docs done...")
+        logger.info(f"Successfully processed {len(docs)} html docs.")
         return docs
     except Exception as e:
-        logger.error(f"Error occurred while retrieving documents: {e}")
+        logger.exception(f"Error occurred while retrieving documents: {e}")
         return []
 
 
@@ -279,8 +289,13 @@ class CustomSearxSearchWrapper(SearxSearchWrapper):
         return results
 
 
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
+
+
 async def check_url(url: str):
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(verify=ssl_context) as client:
         try:
             response = await client.get(url)
             return url, response.status_code
@@ -290,11 +305,14 @@ async def check_url(url: str):
 
 async def check_urls(urls: list[str]):
     tasks = [check_url(url) for url in urls]
-    results = await asyncio.gather(*tasks)
-    for url, status_code in results:
-        if status_code is None:
-            logger.warning(f"URL: {url} - Failed to connect")
-    return results
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    valid_results = []
+    for result in results:
+        if isinstance(result, Exception):
+            logger.warning(f"Error checking URL: {str(result)}")
+        else:
+            valid_results.append(result)
+    return valid_results
 
 
 def check_urls_access(urls: list[str]) -> list[str]:
@@ -327,6 +345,49 @@ def format_result(results: List[Dict]) -> str:
     return formatted_docs_str
 
 
+def extract_numbers_from_text(text) -> list[int]:
+    # 使用正则表达式匹配文本中的数字
+    numbers = [int(num) for num in re.findall(r"\b\d+\b", text)]
+    return numbers
+
+
+def extract_json_from_content(content: str) -> Dict:
+    """
+    从内容中提取JSON字符串并转换为字典。
+
+    Args:
+        content (str): 包含JSON的字符串
+
+    Returns:
+        Dict: 解析后的JSON字典
+    """
+    # 使用正则表达式匹配JSON部分
+    match = re.search(r"\{.*\}", content, re.DOTALL)
+    if match:
+        json_str = match.group()
+        try:
+            return json.loads(json_str)
+        except json.JSONDecodeError:
+            logger.error(f"无法解析JSON: {json_str}")
+    logger.warning(f"未找到有效的JSON: {content}")
+    return {}
+
+
+def process_llm_response(x):
+    """
+    处理语言模型的响应。
+
+    Args:
+        x: 语言模型的响应对象
+
+    Returns:
+        Dict: 处理后的参数字典
+    """
+    if x.tool_calls:
+        return x.tool_calls[0]["args"]
+    return extract_json_from_content(x.content)
+
+
 def create_seaxng_retriever_v2(llm: BaseLanguageModel) -> Runnable:
     SEARCH_TOOLS_PROMPT = PromptTemplate.from_template(SEARCH_TOOLS_TEMPLATE).partial(
         current_date=datetime.now().isoformat()
@@ -341,7 +402,7 @@ def create_seaxng_retriever_v2(llm: BaseLanguageModel) -> Runnable:
         RunnablePassthrough()
         | SEARCH_TOOLS_PROMPT
         | llm_with_tools
-        | (lambda x: x.tool_calls[0]["args"])
+        | process_llm_response
         | searxng_search
     ).with_config(run_name="SearXNGSearchResult")
 
@@ -353,6 +414,7 @@ def create_seaxng_retriever_v2(llm: BaseLanguageModel) -> Runnable:
         | SELECT_BEST_RESULT_PROMPT
         | llm
         | StrOutputParser()
+        | extract_numbers_from_text
     )
 
     chain = (
