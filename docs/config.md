@@ -35,9 +35,16 @@ embedding:
 # openai模型参数
 openai:
   temperature: 1
-  modelname: "gpt-3.5-turbo-0125" #"gpt-3.5-turbo-1106"
+  modelname: "gpt-3.5-turbo-0125"
   api_base: ${OPENAI_API_BASE:}
   api_key: ${OPENAI_API_KEY:}
+
+# deepseek模型参数
+deepseek:
+  temperature: 1
+  modelname: "deepseek-chat"
+  api_base: ${DEEPSPEAK_API_BASE:}
+  api_key: ${DEEPSPEAK_API_KEY:}
 
 # zhipuai模型参数
 zhipuai:

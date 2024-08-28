@@ -112,6 +112,10 @@ OPENAI_API_KEY
 ZHIPUAI_API_KEY
 ZHIPUAI_API_BASE
 
+# DeepSeek 大模型API
+DEEPSPEAK_API_KEY
+DEEPSPEAK_API_BASE
+
 # LangChain调试 API
 LANGCHAIN_API_KEY
 
@@ -130,7 +134,16 @@ python -m langchain_searxng
 
 # 查看API
 访问: http://localhost:8002/docs 获取 API 信息
+
+# 启动前端页面
+cd webui
+streamlit run webui.py
 ```
+
+<p align="center">
+	<img src="./docs/pic/example1.png"><br>
+  <b face="雅黑">WebUI展示</b>
+</p>
 
 - 搜索问答模式
 
@@ -154,6 +167,8 @@ python -m langchain_searxng
 
 **I. 开启 智谱 WebSearch**
 
+对应 Webui 页面 ➡️ 智谱搜索
+
 ```shell
 {
     ...
@@ -165,10 +180,12 @@ python -m langchain_searxng
 
 **Ⅱ. 开启 AI+SearXNG V2 版本**
 
+对应 Webui 页面 ➡️ SearXNG 搜索
+
 ```shell
 {
     ...
-    "llm": "zhipuai", #可选：默认openai,可选zhipuai
+    "llm": "deepseek", #可选：默认openai,可选zhipuai,可选deepseek
     "retriever": "searx" #可选：默认searx
 
 }
@@ -237,6 +254,7 @@ python -m langchain_searxng
 │   ├── __main__.py #入口
 │   └── __version__.py
 ├── log # 日志目录
+├── wwebui # 前端展示页面
 ```
 
 ### 3. 功能介绍
@@ -244,7 +262,7 @@ python -m langchain_searxng
 - 支持查询结果 http sse 流式和非流式（整体）返回
 - 支持联网查询 QA 和直接 QA 切换
 - 支持 Token 计算（含 embedding）
-- 支持 openai 和 zhipuai 两种大模型
+- 支持 openai、zhipuai、deepseek 三种大模型
 - 支持 配置文件动态加载
 - 支持 智谱 AI 新推出的 WebSearch 功能
 
@@ -253,12 +271,12 @@ python -m langchain_searxng
 - [x] 搭建 LangChain-SearXNG 初步框架，完善基本功能
 - [x] 支持配置文件动态加载，方便更改相关参数
 - [x] 完善 网站页面内容爬取效果
-  - [x] 支持网络访问异常处理，方便国内环境使用
+- [x] 支持网络访问异常处理，方便国内环境使用
 - [x] 支持智谱 WebSearch 功能
 - [x] 升级 SearXNG 搜索问题,支持更快更精准的回答
-- [ ] 搭建前端 Web Demo
+- [x] 搭建前端 Web Demo
 - [ ] Docker 化项目，便于部署传播
-- [ ] 支持视频搜索
+- [x] 支持视频搜索
 - [ ] 优化 Prompt，支持输出更丰富的内容
 
 ## 🌏 项目交流讨论

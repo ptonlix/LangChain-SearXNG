@@ -265,7 +265,7 @@ def main():
     initialize_session_state()
     display_chat_history()
 
-    if prompt := st.chat_input():
+    if prompt := st.chat_input(placeholder="请输入搜索内容"):
         process_user_input(prompt, base_url, network_flag, llm_model, retriever_model)
 
 

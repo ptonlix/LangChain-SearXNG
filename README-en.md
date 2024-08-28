@@ -92,6 +92,10 @@ Enter the following variables in the configuration file or set them via environm
 OPENAI_API_BASE
 OPENAI_API_KEY
 
+# DeepSeek Large Model API
+DEEPSEEK_API_BASE
+DEEPSEEK_API_KEY
+
 # ZHIPUAI Zhishang API
 ZHIPUAI_API_KEY
 
