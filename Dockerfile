@@ -13,9 +13,6 @@ ENV PATH="/root/.local/bin:$PATH"
 # 复制项目文件
 COPY . /app
 
-# 配置 Poetry 使用清华源
-RUN poetry source add --priority=primary mirrors https://pypi.tuna.tsinghua.edu.cn/simple/
-
 # 创建config目录
 RUN mkdir -p /app/config
 
@@ -30,6 +27,7 @@ EXPOSE 8002 8501
 RUN echo '#!/bin/bash\n\
     if [ -f /app/config/settings.yaml ]; then\n\
     cp /app/config/settings.yaml /app/settings.yaml\n\
+    echo "Using outside existing settings.yaml in /app"\n\
     elif [ -f /app/settings.yaml ]; then\n\
     echo "Using existing settings.yaml in /app"\n\
     else\n\
