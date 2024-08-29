@@ -351,7 +351,7 @@ def extract_numbers_from_text(text) -> list[int]:
     return numbers
 
 
-def extract_json_from_content(content: str) -> Dict:
+def extract_json_from_content(query: str, content: str) -> Dict:
     """
     从内容中提取JSON字符串并转换为字典。
 
@@ -370,10 +370,16 @@ def extract_json_from_content(content: str) -> Dict:
         except json.JSONDecodeError:
             logger.error(f"无法解析JSON: {json_str}")
     logger.warning(f"未找到有效的JSON: {content}")
-    return {}
+    return {
+        "query": query,
+        "num_results": 30,
+        "language": "zh-CN",
+        "safesearch": 1,
+        "categories": ["general"],
+    }
 
 
-def process_llm_response(x):
+def process_llm_response(x: dict):
     """
     处理语言模型的响应。
 
@@ -383,9 +389,11 @@ def process_llm_response(x):
     Returns:
         Dict: 处理后的参数字典
     """
-    if x.tool_calls:
-        return x.tool_calls[0]["args"]
-    return extract_json_from_content(x.content)
+    query = x.get("query")
+    output = x.get("output")
+    if output.tool_calls:
+        return output.tool_calls[0]["args"]
+    return extract_json_from_content(query, output.content)
 
 
 def create_seaxng_retriever_v2(llm: BaseLanguageModel) -> Runnable:
@@ -399,9 +407,12 @@ def create_seaxng_retriever_v2(llm: BaseLanguageModel) -> Runnable:
     llm_with_tools = llm.bind(tools=[convert_to_openai_tool(searxng_search)])
 
     _search = (
-        RunnablePassthrough()
-        | SEARCH_TOOLS_PROMPT
-        | llm_with_tools
+        RunnableMap(
+            {
+                "query": RunnablePassthrough(),
+                "output": SEARCH_TOOLS_PROMPT | llm_with_tools,
+            }
+        )
         | process_llm_response
         | searxng_search
     ).with_config(run_name="SearXNGSearchResult")
