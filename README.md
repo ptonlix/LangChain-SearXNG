@@ -73,6 +73,10 @@ langchain-searxng:v0.1.8
 详情可以参考配置文件介绍  
 [配置文件修改](#3.3)
 
+- 访问 WebUI
+
+http://localhost:8501
+
 ### 3.手动部署
 
 #### 1.部署 Python 环境
