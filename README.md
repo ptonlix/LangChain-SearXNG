@@ -19,7 +19,7 @@
 </p>
 
 🌟🌟🌟  
-**重要更新： LangChain-SearXNG 全面升级到 v2 版本, 支持更快搜索更精准问答**🚀🔥💥  
+**重要更新： LangChain-SearXNG 支持 Docker 部署, 支持一键部署体验**🚀🔥💥  
 🌟🌟🌟
 
 ## 🚀 Quick Install
@@ -54,7 +54,28 @@ search:
 docker compose up
 ```
 
-### 2.部署 Python 环境
+### 2.Docker 部署
+
+- 拉取镜像
+
+```shell
+docker pull ptonlix/langchain-searxng:v0.1.8
+
+#通过外部配置文件挂载启动容器
+docker run -p 8002:8002 -p 8501:8501 \
+ -v ./settings-pro.yaml:/app/config/settings.yaml \
+ --name langchain-searxng \
+langchain-searxng:v0.1.8
+```
+
+- 配置文件 settings-pro.yaml
+
+详情可以参考配置文件介绍
+[配置文件修改](#3.3)
+
+### 3，手动部署
+
+#### 1.部署 Python 环境
 
 - 安装 miniconda
 
@@ -80,7 +101,7 @@ conda create -n LangChain-SearXNG python==3.10.11
 curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-### 3. 运行 LangChain-SearXNG
+#### 2. 运行 LangChain-SearXNG
 
 - 安装依赖
 
@@ -92,16 +113,17 @@ cd LangChain-SearXNG # 进入项目
 poetry install # 安装依赖
 ```
 
-- 修改配置文件
+<h4 id="3.3">3.修改配置文件</h3>
 
 [OpenAI 文档](https://platform.openai.com/docs/introduction)  
 [ZhipuAI 文档](https://open.bigmodel.cn/dev/howuse/introduction)  
-[LangChain API](https://smith.langchain.com)
+[DeepSeek 文档](https://platform.deepseek.com/api-docs/zh-cn/)  
+[LangSmith API](https://smith.langchain.com)
 
 ```shell
 # settings.yaml
 
-配置文件录入或通过环境变量设置以下变量
+配置文件录入或通过环境变量设置以下变量,建议配置三个大模型API，在体验时可以自由选择模型来体验
 
 # 根据自身环境选择合适的 大模型API
 # OPENAI 大模型API
@@ -126,7 +148,7 @@ SEARX_HOST
 
 详情配置文件介绍见: [LangChain-SearXNG 配置](./docs/config.md)
 
-- 启动项目
+#### 4.启动项目
 
 ```shell
 # 启动项目
