@@ -19,10 +19,16 @@
 </p>
 
 🌟🌟🌟  
-**重要更新： LangChain-SearXNG 支持 Docker 部署, 支持一键部署体验**🚀🔥💥  
+**重要更新： LangChain-SearXNG 支持 Docker 部署, 支持 docker-compose 一键部署体验**🚀🔥💥  
 🌟🌟🌟
 
 ## 🚀 Quick Install
+
+🛫 项目支持三种部署方式，可以按需选取
+
+- docker-compose 部署
+- 分开 SearXNG 和 LangChain-SearXNG Docker 部署
+- 手动部署
 
 ### 1.docker-compose 部署
 
@@ -62,6 +68,7 @@ search:
 - 启动 docker
 
 ```shell
+cd LangChain-SearXNG
 docker compose up
 ```
 
