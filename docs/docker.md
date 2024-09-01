@@ -22,3 +22,14 @@ docker push ptonlix/langchain-searxng:v0.1.8
 docker tag ptonlix/langchain-searxng:v0.1.8 ptonlix/langchain-searxng:latest
 docker push ptonlix/langchain-searxng:latest
 ```
+
+## 整合 SearXNG 和 LangChain-SearXNG
+
+```shell
+git submodule add https://github.com/searxng/searxng-docker.git searxng-docker
+git submodule update --init --recursive
+```
+
+```shell
+sed -i "s|ultrasecretkey|$(openssl rand -hex 32)|g" searxng-docker/searxng/settings.yml
+```

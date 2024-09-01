@@ -24,9 +24,52 @@
 
 ## 🚀 Quick Install
 
-### 1. 部署 SearXNG
+### 1.docker-compose 部署
 
-> 由于 SearXNG 需要访问外网，建议部署选择外网服务器  
+> 由于 SearXNG 需要访问外网，建议部署准备好外网环境
+
+- 拉取项目完整代码
+
+```shell
+git clone https://github.com/ptonlix/LangChain-SearXNG.git --recursive
+cd LangChain-SearXNG/searxng-docker
+
+# 录入邮箱，域名可不配置
+vim .env
+
+# 修改searxng配置文件
+vim searxng/settings.yml
+
+# 修改 secret_key
+openssl rand -hex 32 # 生成密钥填入
+
+# 修改 limiter 和search，其它参数保持原配置文件不变
+# see https://docs.searxng.org/admin/settings/settings.html#settings-use-default-settings
+use_default_settings: true
+server:
+  limiter: false  # can be disabled for a private instance
+search:
+  formats:
+    - html
+    - json
+```
+
+- 新增配置文件 settings-pro.yaml
+
+详情可以参考配置文件介绍  
+[配置文件修改](#3.3)
+
+- 启动 docker
+
+```shell
+docker compose up
+```
+
+### 2.分开部署 SearXNG 和 LangChain-SearXNG
+
+#### 1.单独部署 SearXNG
+
+> 由于 SearXNG 需要访问外网，建议部署选择外网服务器
 > 以下部署示例选择以腾讯云轻量服务器-Centos 系统为例
 
 根据 [searxng-docker](https://github.com/searxng/searxng-docker)教程，按照以下操作，容器化部署 SearXNG
@@ -39,22 +82,10 @@ cd searxng-docker
 # 修改域名和录入邮箱
 vim .env
 
-# 修改searxng配置文件 searxng/settings.yml
-# 注意修改 limiter 和search，其它参数保持原配置文件不变
-# see https://docs.searxng.org/admin/settings/settings.html#settings-use-default-settings
-use_default_settings: true
-server:
-  limiter: false  # can be disabled for a private instance
-search:
-  formats:
-    - html
-    - json
-
-# 启动docker
-docker compose up
+# 其余配置同上docker-compose 部署
 ```
 
-### 2.Docker 部署
+#### 2.LangChain-SearXNG Docker 部署
 
 - 拉取镜像
 
@@ -145,7 +176,7 @@ DEEPSPEAK_API_BASE
 # LangChain调试 API
 LANGCHAIN_API_KEY
 
-# SearXNG请求地址
+# SearXNG请求地址,docker-compose 部署无需修改该变量
 SEARX_HOST
 
 ```
