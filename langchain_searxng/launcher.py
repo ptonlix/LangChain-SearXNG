@@ -54,7 +54,7 @@ def create_app(root_injector: Injector) -> FastAPI:
             openapi_schema = get_openapi(
                 title="Langchain-SearXNG",
                 description=description,
-                version="0.1.8",
+                version="0.1.9",
                 summary="AI search engine based on SearXNG and LangChain",
                 contact={
                     "url": "https://github.com/ptonlix",
