@@ -345,7 +345,7 @@ streamlit run webui.py
 
 ## 🌏 项目交流讨论
 
-<img height=240 src="https://img.gejiba.com/images/f0cf4242e87615dff574806169f9732a.png"/>
+<img height=240 src="http://cdn.oyster-iot.cloud/202505231802103.png"/>
 
 🎉 扫码联系作者，如果你也对本项目感兴趣  
 🎉 欢迎加入 LangChain-X (帝阅开发社区) 项目群参与讨论交流
